@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <cstdlib>
+#include <pcap.h>
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[1;31m"		//error
@@ -56,4 +57,16 @@ void display_start_message () {
 
 void display_end_message () {
 	std::cout << KCYN << "=======Copyright (c) 2015 Rakholiya Jenish=======" << KNRM << std::endl;
+}
+
+u_int32_t get_user_id_of_requester () {
+	//Random number generator for user_id
+}
+
+u_int32_t get_user_id_of_sender () {
+	//Random number generator for user_id
+}
+
+u_int32_t generate_request_id () {
+	//Random number generator for request_id
 }
