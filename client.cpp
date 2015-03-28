@@ -6,6 +6,7 @@
 #include "infixtopostfix.h"
 #include "packetheader.h"
 #include "util.h"
+#include "handlepacket.h"
 
 using namespace std;
 
@@ -83,7 +84,7 @@ void fill_array (string postfix) {
 	number_of_operands = operands_iterator;
 }
 
-void send_packet( pcap *handle, MathPacketHeader header, u_int8_t type ) {
+void send_packet ( pcap *handle, MathPacketHeader header, u_int8_t type ) {
 	if ( type == MATH_TYPE_REQUEST ) {
 		//SEND REQUEST TYPE PACKET
 		header.type_of_packet = MATH_TYPE_REQUEST;
@@ -115,4 +116,20 @@ void client ( pcap_t *handle ) {
 	//send packet until ack or ans is received
 	//display answer
 	//send ans ack
+	/*
+	send_packet(handle,header,MATH_TYPE_REQUEST);
+	MathPacketHeader temp;
+	while (ture) {
+		get_ack_packet(handle,&temp);
+		if ( is_type_ack_request(temp) && is_request_id_same(header,temp) ) {
+			header.user_id_of_sender = temp.user_id_of_sender;
+			return true;
+		} else {
+			return false;
+		}
+	}
+	header.user_id_of_sender = tempid;
+	while ( !get_answer(handle, header) );
+	send_packet(handle,header,MATH_TYPE_ACK_ANSWER);
+	*/
 }
