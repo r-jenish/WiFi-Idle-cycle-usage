@@ -6,7 +6,7 @@ using namespace std;
 
 int main () {
 	display_start_message();
-	prompt("Enter which side of the program you want to run:\n1. Server\n2. Client");
+	prompt("Enter which side of the program you want to run: (1) Server (2) Client");
 	string query;
 	cin >> query;
 	if ( query == '1' ) {
