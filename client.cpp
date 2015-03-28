@@ -12,7 +12,9 @@ void client () {
 	string infix;
 	prompt("Enter the expression in infix notation: ");
 	cin >> infix;
-	checkinput(infix);
+	if ( !checkinput(infix) ) {
+		fatalerror("Incorrect input format");
+	}
 	convert_to_postfix(infix);						//Convert infix to postfix
 	
 }
