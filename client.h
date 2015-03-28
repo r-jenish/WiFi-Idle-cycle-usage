@@ -1,6 +1,8 @@
 #ifndef _CLIENT_H_
 #define _CLIENT_H_
 
-void client();
+#include <pcap.h>
+
+void client(pcap_t*);
 
 #endif
