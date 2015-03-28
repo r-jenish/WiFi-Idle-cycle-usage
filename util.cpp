@@ -12,7 +12,7 @@
 #define KCYN  "\x1B[1;36m"		//end
 #define KWHT  "\x1B[1;37m"
 
-bool checkinput ( string input ) {
+bool checkinput ( std::string input ) {
 	for ( int i = 0; i < input.length(); i++ ) {
 		if ( (input[i] >= '0' && input[i] <= '9') ||
 			  input[i] == '+'                     ||
@@ -30,7 +30,7 @@ bool checkinput ( string input ) {
 
 void fatalerror (std::string err_message) {
 	std::cout << KRED << "- " << err_message << KNRM << std::endl;
-	display_end_message():
+	display_end_message();
 	exit(-1);
 }
 
@@ -48,6 +48,10 @@ void ack_message (std::string ack) {
 
 void display_message_related_to_packet (std::string message) {
 	std::cout << KBLU << "> " << message << KNRM << std::endl;
+}
+
+void display_start_message () {
+	std::cout << KCYN << "=======DISTRIBUTED NETWORK MATH CALCULATOR=======" << KNRM << std::endl;
 }
 
 void display_end_message () {
