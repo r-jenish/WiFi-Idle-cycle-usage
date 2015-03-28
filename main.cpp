@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <pcap.h>
 #include "util.h"
 #include "client.h"
 
