@@ -17,14 +17,14 @@ struct MathPacketHeader {
     u_int16_t number_of_operands;
 } __attribute__((__packed__));
 
-const u_int8_t MATH_OPERATOR_PLUS        = 1,
-      u_int8_t MATH_OPERATOR_MINUS       = 2,
-      u_int8_t MATH_OPERATOR_MULTIPLY    = 3,
-      u_int8_t MATH_OPERATOR_DIVIDE      = 4,
-      u_int8_t MATH_OPERATOR_MODULO      = 5,
-      u_int8_t MATH_OPERATOR_BITWISE_AND = 6,
-      u_int8_t MATH_OPERATOR_BITWISE_OR  = 7,
-      u_int8_t MATH_OPERATOR_BITWISE_XOR = 8;
+const u_int8_t MATH_OPERATOR_PLUS        = 1;
+const u_int8_t MATH_OPERATOR_MINUS       = 2;
+const u_int8_t MATH_OPERATOR_MULTIPLY    = 3;
+const u_int8_t MATH_OPERATOR_DIVIDE      = 4;
+const u_int8_t MATH_OPERATOR_MODULO      = 5;
+const u_int8_t MATH_OPERATOR_BITWISE_AND = 6;
+const u_int8_t MATH_OPERATOR_BITWISE_OR  = 7;
+const u_int8_t MATH_OPERATOR_BITWISE_XOR = 8;
 
 struct ieee80211_radiotap_header {
 	u_int8_t it_version;     /* set to 0 */
