@@ -4,12 +4,12 @@
 #include <cstdlib>
 
 #define KNRM  "\x1B[0m"
-#define KRED  "\x1B[1;31m"
-#define KGRN  "\x1B[1;32m"
-#define KYEL  "\x1B[1;33m"
-#define KBLU  "\x1B[1;34m"
-#define KMAG  "\x1B[1;35m"
-#define KCYN  "\x1B[1;36m"
+#define KRED  "\x1B[1;31m"		//error
+#define KGRN  "\x1B[1;32m"		//ack or any other stuff that got completed successfully
+#define KYEL  "\x1B[1;33m"		//warn
+#define KBLU  "\x1B[1;34m"		//ongoing process
+#define KMAG  "\x1B[1;35m"		//prompt
+#define KCYN  "\x1B[1;36m"		//end
 #define KWHT  "\x1B[1;37m"
 
 bool checkinput ( string input ) {
@@ -36,6 +36,10 @@ void fatalerror (std::string err_message) {
 
 void warning (std::string warn_message) {
 	std::cout << KYEL << "! " << warn_message << KNRM << std::endl;
+}
+
+void prompt (std::string message) {
+	std::cout << KMAG << "? " << message << KNRM << std::endl;
 }
 
 void ack_message (std::string ack) {
