@@ -19,6 +19,9 @@ namespace {
 	u_int8_t number_of_operators_after_operand[max_number_of_operands];             // The positions of the operators is as required for Reverse Polish Notation.
 	int32_t answer = 0;
 	const u_int16_t end_packet_magic_number = 21845;
+	u_int32_t user_id_of_requester;
+	u_int32_t user_id_of_sender;
+	u_int32_t request_id;
 };
 
 int calcans () {
@@ -77,11 +80,70 @@ void fill_array_from_packet( u_int8_t buffer[] ) {
 	memcpy(&answer,buffer+lengthread,4);
 }
 
+namespace {
+	void send_packet ( pcap_t *handle, MathPacketHeader header ) {
+		u_int8_t buffer[900];
+		if ( header.type_of_packet == MATH_TYPE_SEND_ANSWER ) {
+			int packet_size = 0;
+			memcpy(buffer,operands,number_of_operands*4);
+			packet_size += number_of_operands*4;
+			memcpy(buffer+packet_size,operators,number_of_operands-1);
+			packet_size += (number_of_operands-1);
+			memcpy(buffer+packet_size,number_of_operators_after_operand,number_of_operands);
+			packet_size += number_of_operands;
+			memcpy(buffer+packet_size,&answer,4);
+			packet_size += 4;
+			memcpy(buffer+packet_size,&end_packet_magic_number,2);
+			packet_size += 2;
+			send_packet_with_data(handle,header,buffer,packet_size);
+		} else if ( header.type_of_packet == MATH_TYPE_ACK_REQUEST ) {
+			send_ack_packet(handle,header);
+		}
+	}
+
+	bool get_ack (pcap_t *handle) {
+		MathPacketHeader temphead;
+		return ( get_ack_packet(handle,&temphead) && 
+				 temphead.type_of_packet == MATH_TYPE_ACK_ANSWER && 
+				 is_request_id_same(temphead,request_id) );
+	}
+
+	bool get_req_packet (pcap_t *handle, MathPacketHeader *header, u_int8_t pktbuf[]) {
+		return ( get_packet(handle,header,pktbuf) && 
+				 header->type_of_packet == MATH_TYPE_REQUEST);
+	}
+};
+
 void server (pcap_t *handle) {	
 	MathPacketHeader header;
+	u_int8_t buffer[1000];
+	user_id_of_sender = get_user_id_of_sender();
+	user_id_of_requester = 0;
+	request_id = 0;
 	//get packet
-	//send ack
+	while ( !get_req_packet(handle,&header,buffer) );
+	display_message_related_to_packet("Answer requested by a client.");
+	header.user_id_of_sender = user_id_of_sender;
+	user_id_of_requester = header.user_id_of_requester;
+	request_id = header.request_id;
+	number_of_operands = header.number_of_operands;
+	fill_array_from_packet(buffer);
+	display_message_related_to_packet("Sending request arrived acknowledgement.");
+	for ( int i = 0; i < 1000; i++ ) {
+		header.type_of_packet = MATH_TYPE_ACK_REQUEST;
+		send_packet(handle,header);
+	}
+	display_message_related_to_packet("Calulating answer.");
 	answer = calcans();
-	//send ans
-	//wait for ack
+	display_message_related_to_packet("Sending answer to the client.");
+	header.type_of_packet = MATH_TYPE_SEND_ANSWER;
+	send_packet(handle,header);
+	int c = 0;
+	while ( !get_ack(handle) ) {
+		header.type_of_packet = MATH_TYPE_SEND_ANSWER;
+		c = (c+1)%100;
+		if ( c == 0 )
+			send_packet(handle,header);
+	}
+	ack_message("Answer received by client.");
 }
