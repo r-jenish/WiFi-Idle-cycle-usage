@@ -115,7 +115,7 @@ namespace {
 	bool get_ack (pcap_t *handle, MathPacketHeader *header) {
 		MathPacketHeader temphead;
 		if ( get_ack_packet(handle,&temphead) && 
-			 is_request_id_same(temphead,request_id) &&
+			 is_request_id_same(temphead,request_id) && 
 			 temphead.type_of_packet == MATH_TYPE_ACK_REQUEST ) {
 			user_id_of_sender = temphead.user_id_of_sender;
 			return true;
@@ -128,7 +128,7 @@ namespace {
 		u_int8_t buffer[1000];
 		int32_t ans;
 		if ( get_packet(handle,&temphead,buffer) && 
-			 is_request_id_same(temphead,request_id) &&
+			 is_request_id_same(temphead,request_id) && 
 			 temphead.type_of_packet == MATH_TYPE_SEND_ANSWER ) {
 			memcpy(&ans,buffer+6*number_of_operands-1,4);
 			answer = ans;
