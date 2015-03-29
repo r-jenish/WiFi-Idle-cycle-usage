@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <pcap.h>
 #include <string>
 #include <cstdlib>
@@ -5,6 +7,7 @@
 #include "packetheader.h"
 #include "handlepacket.h"
 
+using namespace std;
 
 void send_packet_with_data (pcap_t *handle, MathPacketHeader header ,u_int8_t buffer[], int length) {
 	u_int8_t sendbuffer[1000];
@@ -28,25 +31,30 @@ void send_ack_packet (pcap_t *handle, MathPacketHeader header) {
 
 bool get_packet (pcap_t *handle, MathPacketHeader *header, u_int8_t pktbuffer[] ) {
 	u_int8_t buffer[1000];
-	pcap_pkthdr *hdr;
-	const u_char* temp = pcap_next(handle,hdr);
-	memcpy(buffer,temp,hdr->len);
-	get_packetinfo(handle,hdr,buffer,header,pktbuffer);
-	if ( is_math_type_request(*header) || is_math_type_send_answer(*header) ) {
-		return true;
-	} else {
-		return false;
+	pcap_pkthdr hdr;
+	MathPacketHeader temphead;
+	const u_char* temp = pcap_next(handle,&hdr);
+	if ( hdr.len >= 27 && hdr.len <= 1000 ) {
+		memcpy(buffer,temp,hdr.len);
+		get_MathPacketHeader(handle,buffer,&temphead);
+		if (temphead.number_of_operands <= 165) {
+			get_packetinfo(handle,&hdr,buffer,header,pktbuffer);
+			return ( header->magic_number == 9770010 && 
+				     (is_math_type_request(*header) || is_math_type_send_answer(*header)) );
+		}
 	}
+	return false;
 }
 
 bool get_ack_packet (pcap_t *handle, MathPacketHeader *header) {
-	u_int8_t buffer[100];
-	pcap_pkthdr *hdr;
-	const u_char* temp = pcap_next(handle,hdr);
-	memcpy(buffer,temp,hdr->len);
-	get_MathPacketHeader(handle,buffer,header);
-	if ( is_math_type_ack_request(*header) || is_math_type_ack_answer(*header) ) {
-		return true;
+	u_int8_t buffer[1000];
+	pcap_pkthdr hdr;
+	const u_char* temp = pcap_next(handle,&hdr);
+	if ( hdr.len >= 27 && hdr.len <= 1000 ) {
+		memcpy(buffer,temp,hdr.len);
+		get_MathPacketHeader(handle,buffer,header);
+		return ( header->magic_number == 9770010 && 
+			(is_math_type_ack_request(*header) || is_math_type_ack_answer(*header)) );
 	} else {
 		return false;
 	}
@@ -72,16 +80,16 @@ void wrap_datalink ( int datalink, u_int8_t buffer[], int *length) {
 			0x00, 0x00, 0x00, 0x41,
 			0x08, 0x00, 0x00, 0x00
 		};
-		memcpy(buffer,prismHeader,8);
-		*length += 8;
+		memcpy(buffer,prismHeader,sizeof(prismHeader));
+		*length += sizeof(prismHeader);
 	} else if ( datalink == DLT_IEEE802_11_RADIO ) {
 		const u_int8_t radiotapHeader[] = { 
 			0x00, 0x00,
 			0x08, 0x00,
-			0x00, 0x00, 0x00, 0x00 
+			0x04, 0x0c, 0x00, 0x00,
 		};
-		memcpy(buffer,radiotapHeader,8);
-		*length += 8;
+		memcpy(buffer,radiotapHeader,sizeof(radiotapHeader));
+		*length += sizeof(radiotapHeader);
 	}
 }
 
@@ -113,6 +121,6 @@ inline bool is_math_type_ack_answer ( MathPacketHeader header ) {
 	return header.type_of_packet == MATH_TYPE_ACK_ANSWER;
 }
 
-inline bool is_request_id_same ( MathPacketHeader header, u_int32_t request_id ) {
+bool is_request_id_same ( MathPacketHeader header, u_int32_t request_id ) {
 	return header.request_id == request_id;
 }
