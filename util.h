@@ -9,6 +9,7 @@ void warning(std::string);
 void prompt(std::string);
 void ack_message(std::string);
 void display_message_related_to_packet(std::string);
+void display_answer(int32_t);
 void display_start_message();
 void display_end_message();
 u_int32_t get_user_id_of_requester();

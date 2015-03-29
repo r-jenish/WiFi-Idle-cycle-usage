@@ -51,6 +51,10 @@ void display_message_related_to_packet (std::string message) {
 	std::cout << KBLU << "> " << message << KNRM << std::endl;
 }
 
+void display_answer ( int32_t answer ) {
+	std::cout << KWHT << "++> Answer for the given expression is: " << answer << KNRM << std::endl;
+}
+
 void display_start_message () {
 	std::cout << KCYN << "=======DISTRIBUTED NETWORK MATH CALCULATOR=======" << KNRM << std::endl;
 }
