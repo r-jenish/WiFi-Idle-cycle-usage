@@ -3,6 +3,7 @@
 #include <pcap.h>
 #include "util.h"
 #include "client.h"
+#include "server.h"
 
 using namespace std;
 
