@@ -60,13 +60,13 @@ void display_end_message () {
 }
 
 u_int32_t get_user_id_of_requester () {
-	//Random number generator for user_id
+	return rand()%42949672;
 }
 
 u_int32_t get_user_id_of_sender () {
-	//Random number generator for user_id
+	return rand()%42949672;
 }
 
 u_int32_t generate_request_id () {
-	//Random number generator for request_id
+	return rand()%42949672;
 }
