@@ -11,6 +11,7 @@ bool get_ack_packet(pcap_t*,MathPacketHeader*);
 void get_MathPacketHeader(pcap_t*, u_int8_t[], MathPacketHeader*);
 void get_packetinfo (pcap_t*, pcap_pkthdr*, u_char[], MathPacketHeader*, u_int8_t[]);
 void wrap_datalink(int,u_int8_t[],int*);
+void add_IeeeHeader(u_int8_t[],int*);
 int datalink_length(int,u_int8_t[]);
 bool is_math_type_request(MathPacketHeader);
 bool is_math_type_ack_request(MathPacketHeader);

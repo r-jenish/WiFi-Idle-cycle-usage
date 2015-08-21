@@ -13,6 +13,7 @@ void send_packet_with_data (pcap_t *handle, MathPacketHeader header ,u_int8_t bu
 	u_int8_t sendbuffer[1000];
 	int packetsize = 0;
 	wrap_datalink(pcap_datalink(handle),sendbuffer,&packetsize);
+	add_IeeeHeader(sendbuffer,&packetsize);
 	memcpy(sendbuffer+packetsize,&header,19);
 	packetsize += 19;
 	memcpy(sendbuffer+packetsize,buffer,length);
@@ -21,9 +22,10 @@ void send_packet_with_data (pcap_t *handle, MathPacketHeader header ,u_int8_t bu
 }
 
 void send_ack_packet (pcap_t *handle, MathPacketHeader header) {
-	u_int8_t sendbuffer[50];
+	u_int8_t sendbuffer[100];
 	int packetsize = 0;
 	wrap_datalink(pcap_datalink(handle),sendbuffer,&packetsize);
+	add_IeeeHeader(sendbuffer,&packetsize);
 	memcpy(sendbuffer+packetsize,&header,19);
 	packetsize += 19;
 	pcap_inject(handle,sendbuffer,packetsize);
@@ -34,10 +36,10 @@ bool get_packet (pcap_t *handle, MathPacketHeader *header, u_int8_t pktbuffer[] 
 	pcap_pkthdr hdr;
 	MathPacketHeader temphead;
 	const u_char* temp = pcap_next(handle,&hdr);
-	if ( hdr.len >= 27 && hdr.len <= 1000 ) {
+	if ( hdr.len >= 51 && hdr.len <= 1000 ) {
 		memcpy(buffer,temp,hdr.len);
 		get_MathPacketHeader(handle,buffer,&temphead);
-		if (temphead.number_of_operands <= 165) {
+		if (temphead.number_of_operands <= 150) {
 			get_packetinfo(handle,&hdr,buffer,header,pktbuffer);
 			return ( header->magic_number == 9770010 && 
 				     (is_math_type_request(*header) || is_math_type_send_answer(*header)) );
@@ -50,7 +52,7 @@ bool get_ack_packet (pcap_t *handle, MathPacketHeader *header) {
 	u_int8_t buffer[1000];
 	pcap_pkthdr hdr;
 	const u_char* temp = pcap_next(handle,&hdr);
-	if ( hdr.len >= 27 && hdr.len <= 1000 ) {
+	if ( hdr.len >= 51 && hdr.len <= 1000 ) {
 		memcpy(buffer,temp,hdr.len);
 		get_MathPacketHeader(handle,buffer,header);
 		return ( header->magic_number == 9770010 && 
@@ -60,15 +62,17 @@ bool get_ack_packet (pcap_t *handle, MathPacketHeader *header) {
 	}
 }
 
-void get_MathPacketHeader (pcap_t *handle, u_int8_t packet[], MathPacketHeader *header) { // help with pointer
+void get_MathPacketHeader (pcap_t *handle, u_int8_t packet[], MathPacketHeader *header) {
 	int length = 0;
 	length = datalink_length(pcap_datalink(handle),packet);
+	length += 24;
 	memcpy(header,packet+length,19);
 }
 
 void get_packetinfo (pcap_t *handle, pcap_pkthdr *hdr, u_char packet[], MathPacketHeader *header, u_int8_t buffer[]) {
 	int length = 0;
 	length = datalink_length(pcap_datalink(handle),packet);
+	length += 24;
 	memcpy(header,packet+length,19);
 	length+=19;
 	memcpy(buffer,packet+length,6*header->number_of_operands+5);
@@ -91,6 +95,19 @@ void wrap_datalink ( int datalink, u_int8_t buffer[], int *length) {
 		memcpy(buffer,radiotapHeader,sizeof(radiotapHeader));
 		*length += sizeof(radiotapHeader);
 	}
+}
+
+void add_IeeeHeader( u_int8_t buffer[], int *length ) {
+	static u_int8_t u8aIeeeHeader[] = {
+	    0x08, 0x01, 0x00, 0x00,             // Frame control + duration
+	    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, // Address 1 (broadcast)
+	    0x13, 0x22, 0x33, 0x44, 0x55, 0x66, // Address 2
+	    0x13, 0x22, 0x33, 0x44, 0x55, 0x66, // Address 3
+	    0x10, 0x86,                         // Sequence control
+	};
+	cout << sizeof(u8aIeeeHeader);
+	memcpy(buffer+(*length),u8aIeeeHeader,sizeof(u8aIeeeHeader));
+	(*length) += sizeof(u8aIeeeHeader);
 }
 
 int datalink_length ( int datalink, u_int8_t packet[] ) {
